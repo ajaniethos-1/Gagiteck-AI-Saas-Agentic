@@ -1,0 +1,116 @@
+name: Deploy to AWS
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'api/**'
+      - 'dashboard/**'
+      - '.github/workflows/deploy.yml'
+  workflow_dispatch:  # Allow manual trigger
+
+env:
+  AWS_REGION: us-east-1
+  ECR_API_REPOSITORY: gagiteck-dev-api
+  ECR_DASHBOARD_REPOSITORY: gagiteck-dev-dashboard
+  ECS_CLUSTER: gagiteck-dev-cluster
+  ECS_API_SERVICE: gagiteck-dev-api
+  ECS_DASHBOARD_SERVICE: gagiteck-dev-dashboard
+
+jobs:
+  deploy-api:
+    name: Build and Deploy API
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push API image
+        id: build-api
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd api
+          docker build -t $ECR_REGISTRY/$ECR_API_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_API_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_API_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_API_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_API_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_API_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Update ECS API Service
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_API_SERVICE \
+            --force-new-deployment
+
+  deploy-dashboard:
+    name: Build and Deploy Dashboard
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Login to Amazon ECR
+        id: login-ecr
+        uses: aws-actions/amazon-ecr-login@v2
+
+      - name: Build, tag, and push Dashboard image
+        id: build-dashboard
+        env:
+          ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+          IMAGE_TAG: ${{ github.sha }}
+        run: |
+          cd dashboard
+          docker build -t $ECR_REGISTRY/$ECR_DASHBOARD_REPOSITORY:$IMAGE_TAG .
+          docker tag $ECR_REGISTRY/$ECR_DASHBOARD_REPOSITORY:$IMAGE_TAG $ECR_REGISTRY/$ECR_DASHBOARD_REPOSITORY:latest
+          docker push $ECR_REGISTRY/$ECR_DASHBOARD_REPOSITORY:$IMAGE_TAG
+          docker push $ECR_REGISTRY/$ECR_DASHBOARD_REPOSITORY:latest
+          echo "image=$ECR_REGISTRY/$ECR_DASHBOARD_REPOSITORY:$IMAGE_TAG" >> $GITHUB_OUTPUT
+
+      - name: Update ECS Dashboard Service
+        run: |
+          aws ecs update-service \
+            --cluster $ECS_CLUSTER \
+            --service $ECS_DASHBOARD_SERVICE \
+            --force-new-deployment
+
+  notify:
+    name: Deployment Status
+    needs: [deploy-api, deploy-dashboard]
+    runs-on: ubuntu-latest
+    if: always()
+
+    steps:
+      - name: Check deployment status
+        run: |
+          if [ "${{ needs.deploy-api.result }}" == "success" ] && [ "${{ needs.deploy-dashboard.result }}" == "success" ]; then
+            echo "✅ Deployment successful!"
+            echo "API: http://gagiteck-dev-alb-570721524.us-east-1.elb.amazonaws.com:8000"
+            echo "Dashboard: http://gagiteck-dev-alb-570721524.us-east-1.elb.amazonaws.com"
+          else
+            echo "❌ Deployment failed"
+            exit 1
+          fi
