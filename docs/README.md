@@ -41,9 +41,9 @@ Welcome to the Gagiteck AI SaaS Platform documentation. This guide covers everyt
 
 | Resource | Description |
 |----------|-------------|
-| [GitHub Repository](https://github.com/gagiteck/gagiteck-assets) | Source code |
-| [Issue Tracker](https://github.com/gagiteck/gagiteck-assets/issues) | Report bugs |
-| [Discussions](https://github.com/gagiteck/gagiteck-assets/discussions) | Community Q&A |
+| [GitHub Repository](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic) | Source code |
+| [Issue Tracker](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/issues) | Report bugs |
+| [Discussions](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/discussions) | Community Q&A |
 | [Project Board](https://github.com/orgs/gagiteck/projects/1) | Development roadmap |
 
 ## Contributing to Docs

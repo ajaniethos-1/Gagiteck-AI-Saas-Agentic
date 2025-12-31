@@ -83,7 +83,7 @@ OLLAMA_BASE_URL=http://localhost:11434
 ```bash
 # Object Storage (S3-compatible)
 S3_ENDPOINT=https://s3.amazonaws.com
-S3_BUCKET=gagiteck-assets
+S3_BUCKET=gagiteck-ai-saas-agentic
 S3_REGION=us-east-1
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...

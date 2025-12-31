@@ -1,7 +1,7 @@
 # Gagiteck AI SaaS Platform
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/gagiteck/gagiteck-assets/ci.yml?branch=main)](https://github.com/gagiteck/gagiteck-assets/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/ajaniethos-1/gagiteck-AI-SaaS-Agentic/ci.yml?branch=main)](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/actions)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](docs/)
 
 > **Agentic platform for intelligent automation and AI-powered services**
@@ -93,8 +93,8 @@ Gagiteck is a cutting-edge AI SaaS platform that enables businesses to leverage 
 
 ```bash
 # Clone the repository
-git clone https://github.com/gagiteck/gagiteck-assets.git
-cd gagiteck-assets
+git clone https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic.git
+cd gagiteck-AI-SaaS-Agentic
 
 # Copy environment configuration
 cp .env.example .env
@@ -268,8 +268,8 @@ See our [Project Board](https://github.com/orgs/gagiteck/projects/1) for detaile
 ## Support
 
 - **Documentation**: [docs/](docs/)
-- **Issues**: [GitHub Issues](https://github.com/gagiteck/gagiteck-assets/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/gagiteck/gagiteck-assets/discussions)
+- **Issues**: [GitHub Issues](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/issues)
+- **Discussions**: [GitHub Discussions](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/discussions)
 - **Email**: support@gagiteck.com
 
 ---
