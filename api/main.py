@@ -20,11 +20,68 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="Gagiteck AI SaaS Platform",
-    description="REST API for autonomous AI agents and workflow automation",
+    description="""
+## Gagiteck AI SaaS Platform API
+
+Build and deploy autonomous AI agents with powerful workflow automation.
+
+### Features
+
+- **Agents**: Create, configure, and run AI agents with custom tools and memory
+- **Workflows**: Design multi-step workflows with conditional logic and parallel execution
+- **Executions**: Monitor and manage running agent and workflow executions
+
+### Authentication
+
+All API endpoints require authentication via API key:
+
+```
+Authorization: Bearer your-api-key
+```
+
+### Rate Limits
+
+- Free tier: 100 requests/minute
+- Pro tier: 1000 requests/minute
+- Enterprise: Custom limits
+
+### SDKs
+
+- [Python SDK](https://pypi.org/project/gagiteck/)
+- [TypeScript SDK](https://www.npmjs.com/package/@gagiteck/sdk) (coming soon)
+    """,
     version=settings.VERSION,
     docs_url="/docs",
     redoc_url="/redoc",
+    openapi_url="/openapi.json",
     lifespan=lifespan,
+    contact={
+        "name": "Gagiteck Support",
+        "url": "https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic",
+        "email": "support@gagiteck.com",
+    },
+    license_info={
+        "name": "MIT",
+        "url": "https://opensource.org/licenses/MIT",
+    },
+    openapi_tags=[
+        {
+            "name": "Health",
+            "description": "Health check and status endpoints",
+        },
+        {
+            "name": "Agents",
+            "description": "Create and manage AI agents with tools and memory",
+        },
+        {
+            "name": "Workflows",
+            "description": "Design and trigger multi-step automation workflows",
+        },
+        {
+            "name": "Executions",
+            "description": "Monitor and control running executions",
+        },
+    ],
 )
 
 # CORS middleware
