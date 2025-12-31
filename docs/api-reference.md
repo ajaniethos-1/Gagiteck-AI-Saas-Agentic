@@ -595,4 +595,4 @@ X-RateLimit-Reset: 1705334400
 Official SDK libraries:
 - [Python SDK](sdk-python.md)
 - [Node.js SDK](sdk-nodejs.md)
-- [Go SDK](https://github.com/gagiteck/gagiteck-go)
+- [Go SDK](https://github.com/ajaniethos-1/gagiteck-go) *(coming soon)*
