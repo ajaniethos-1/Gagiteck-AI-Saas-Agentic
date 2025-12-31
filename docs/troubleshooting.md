@@ -465,5 +465,5 @@ client = Client(api_key="YOUR_KEY", debug=True)
 ### Contact Support
 
 - **Email**: support@gagiteck.com
-- **GitHub Issues**: [Report a bug](https://github.com/gagiteck/gagiteck-assets/issues)
-- **Discussions**: [Ask questions](https://github.com/gagiteck/gagiteck-assets/discussions)
+- **GitHub Issues**: [Report a bug](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/issues)
+- **Discussions**: [Ask questions](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/discussions)

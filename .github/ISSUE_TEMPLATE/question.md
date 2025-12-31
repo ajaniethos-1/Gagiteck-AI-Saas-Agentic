@@ -25,8 +25,8 @@ Describe what you've already attempted:
 
 ## Documentation Checked
 - [ ] I have checked the [documentation](../docs/)
-- [ ] I have searched existing [issues](https://github.com/gagiteck/gagiteck-assets/issues)
-- [ ] I have searched [discussions](https://github.com/gagiteck/gagiteck-assets/discussions)
+- [ ] I have searched existing [issues](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/issues)
+- [ ] I have searched [discussions](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/discussions)
 
 ## Environment
 - **Gagiteck Version**: [e.g., 1.0.0]
