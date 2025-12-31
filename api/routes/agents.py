@@ -12,21 +12,25 @@ router = APIRouter()
 # --- Models ---
 
 class AgentConfig(BaseModel):
-    """Agent configuration."""
-    model: str = "claude-3-sonnet"
-    max_tokens: int = 4096
-    temperature: float = 0.7
-    max_iterations: int = 25
-    timeout_ms: int = 120000
+    """Agent configuration settings."""
+    model: str = Field("claude-3-sonnet", description="LLM model to use", examples=["claude-3-sonnet", "claude-3-opus", "gpt-4"])
+    max_tokens: int = Field(4096, description="Maximum tokens in response", ge=1, le=100000)
+    temperature: float = Field(0.7, description="Sampling temperature", ge=0, le=2)
+    max_iterations: int = Field(25, description="Max tool-use iterations", ge=1, le=100)
+    timeout_ms: int = Field(120000, description="Request timeout in milliseconds", ge=1000, le=600000)
+
+    model_config = {"json_schema_extra": {"examples": [{"model": "claude-3-sonnet", "max_tokens": 4096, "temperature": 0.7}]}}
 
 
 class AgentCreate(BaseModel):
-    """Request to create an agent."""
-    name: str = Field(..., min_length=1, max_length=100)
-    system_prompt: Optional[str] = None
-    config: Optional[AgentConfig] = None
-    tools: List[str] = []
-    metadata: dict = {}
+    """Request body for creating a new agent."""
+    name: str = Field(..., min_length=1, max_length=100, description="Agent name", examples=["Customer Support Bot"])
+    system_prompt: Optional[str] = Field(None, description="System prompt defining agent behavior", examples=["You are a helpful customer support agent."])
+    config: Optional[AgentConfig] = Field(None, description="Agent configuration settings")
+    tools: List[str] = Field([], description="List of tool IDs the agent can use", examples=[["search", "calculator"]])
+    metadata: dict = Field({}, description="Custom metadata key-value pairs")
+
+    model_config = {"json_schema_extra": {"examples": [{"name": "Support Agent", "system_prompt": "You are a helpful assistant.", "tools": ["search"]}]}}
 
 
 class AgentUpdate(BaseModel):
@@ -83,12 +87,17 @@ _agents_db: dict[str, dict] = {}
 
 # --- Endpoints ---
 
-@router.get("", response_model=AgentList)
+@router.get(
+    "",
+    response_model=AgentList,
+    summary="List agents",
+    description="Retrieve a paginated list of all agents in your account.",
+)
 async def list_agents(
-    limit: int = Query(20, ge=1, le=100),
-    offset: int = Query(0, ge=0),
+    limit: int = Query(20, ge=1, le=100, description="Maximum number of agents to return"),
+    offset: int = Query(0, ge=0, description="Number of agents to skip"),
 ):
-    """List all agents."""
+    """List all agents with pagination support."""
     agents = list(_agents_db.values())
     return AgentList(
         data=[Agent(**a) for a in agents[offset:offset + limit]],
@@ -98,9 +107,15 @@ async def list_agents(
     )
 
 
-@router.post("", response_model=Agent, status_code=201)
+@router.post(
+    "",
+    response_model=Agent,
+    status_code=201,
+    summary="Create agent",
+    description="Create a new AI agent with custom configuration, tools, and system prompt.",
+)
 async def create_agent(request: AgentCreate):
-    """Create a new agent."""
+    """Create a new agent with the specified configuration."""
     agent_id = f"agent_{uuid.uuid4().hex[:12]}"
     now = datetime.utcnow()
 
@@ -120,7 +135,13 @@ async def create_agent(request: AgentCreate):
     return Agent(**agent)
 
 
-@router.get("/{agent_id}", response_model=Agent)
+@router.get(
+    "/{agent_id}",
+    response_model=Agent,
+    summary="Get agent",
+    description="Retrieve a specific agent by its unique identifier.",
+    responses={404: {"description": "Agent not found"}},
+)
 async def get_agent(agent_id: str):
     """Get an agent by ID."""
     if agent_id not in _agents_db:
@@ -160,9 +181,15 @@ async def delete_agent(agent_id: str):
     del _agents_db[agent_id]
 
 
-@router.post("/{agent_id}/run", response_model=AgentRunResponse)
+@router.post(
+    "/{agent_id}/run",
+    response_model=AgentRunResponse,
+    summary="Run agent",
+    description="Execute an agent with a user message. The agent will process the message using its configured LLM and tools.",
+    responses={404: {"description": "Agent not found"}},
+)
 async def run_agent(agent_id: str, request: AgentRunRequest):
-    """Run an agent with a message."""
+    """Run an agent with a message and return the response."""
     if agent_id not in _agents_db:
         raise HTTPException(status_code=404, detail="Agent not found")
 
