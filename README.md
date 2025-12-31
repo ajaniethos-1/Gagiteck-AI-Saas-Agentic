@@ -1,7 +1,7 @@
 # Gagiteck AI SaaS Platform
 
 [![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Build Status](https://img.shields.io/github/actions/workflow/status/ajaniethos-1/gagiteck-AI-SaaS-Agentic/ci.yml?branch=main)](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/actions)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/ajaniethos-1/gagiteck-AI-SaaS-Agentic/jekyll.yml?branch=main)](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/actions)
 [![Documentation](https://img.shields.io/badge/docs-latest-brightgreen.svg)](docs/)
 
 > **Agentic platform for intelligent automation and AI-powered services**
@@ -118,8 +118,8 @@ The platform will be available at `http://localhost:3000`
 ### Using Docker (Recommended)
 
 ```bash
-docker pull gagiteck/platform:latest
-docker run -p 3000:3000 gagiteck/platform:latest
+docker pull ghcr.io/ajaniethos-1/gagiteck-ai-saas-agentic:latest
+docker run -p 3000:3000 ghcr.io/ajaniethos-1/gagiteck-ai-saas-agentic:latest
 ```
 
 ### Manual Installation
@@ -215,9 +215,9 @@ See full [API Documentation](docs/api-reference.md)
 
 ### SDK Libraries
 
-- [Python SDK](https://github.com/gagiteck/gagiteck-python)
-- [Node.js SDK](https://github.com/gagiteck/gagiteck-node)
-- [Go SDK](https://github.com/gagiteck/gagiteck-go)
+- [Python SDK](https://github.com/ajaniethos-1/gagiteck-python) *(coming soon)*
+- [Node.js SDK](https://github.com/ajaniethos-1/gagiteck-node) *(coming soon)*
+- [Go SDK](https://github.com/ajaniethos-1/gagiteck-go) *(coming soon)*
 
 ---
 
@@ -246,22 +246,24 @@ npm run build
 ## Roadmap
 
 ### Q1 2025
-- [x] Core agent framework
-- [x] REST API v1
-- [x] Web dashboard
+- [x] Project setup and documentation
+- [x] GitHub Pages deployment
+- [ ] Core agent framework
+- [ ] REST API v1
 - [ ] Python SDK
 
 ### Q2 2025
+- [ ] Web dashboard
 - [ ] Multi-agent collaboration
 - [ ] Visual workflow builder
-- [ ] Marketplace for agent templates
 
 ### Q3 2025
+- [ ] Marketplace for agent templates
 - [ ] Enterprise SSO integration
 - [ ] On-premise deployment
 - [ ] Advanced analytics
 
-See our [Project Board](https://github.com/orgs/gagiteck/projects/1) for detailed progress.
+See our [Project Board](https://github.com/users/ajaniethos-1/projects/1) for detailed progress.
 
 ---
 
