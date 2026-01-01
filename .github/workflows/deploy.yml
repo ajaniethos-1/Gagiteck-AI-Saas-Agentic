@@ -108,8 +108,9 @@ jobs:
         run: |
           if [ "${{ needs.deploy-api.result }}" == "success" ] && [ "${{ needs.deploy-dashboard.result }}" == "success" ]; then
             echo "✅ Deployment successful!"
-            echo "API: http://gagiteck-dev-alb-570721524.us-east-1.elb.amazonaws.com:8000"
-            echo "Dashboard: http://gagiteck-dev-alb-570721524.us-east-1.elb.amazonaws.com"
+            echo "Dashboard: https://app.mimoai.co"
+            echo "API: https://api.mimoai.co"
+            echo "API Docs: https://api.mimoai.co/docs"
           else
             echo "❌ Deployment failed"
             exit 1
