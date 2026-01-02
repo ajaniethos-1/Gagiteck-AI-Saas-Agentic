@@ -68,7 +68,7 @@ jobs:
 
   api-test:
     runs-on: ubuntu-latest
-    continue-on-error: true  # Don't block other jobs
+
     defaults:
       run:
         working-directory: api
@@ -86,8 +86,7 @@ jobs:
       - name: Run API tests
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: pytest tests/ -v --tb=short || true
-
+          
       - name: Upload coverage
         uses: codecov/codecov-action@v3
         if: always()
