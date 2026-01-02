@@ -11,6 +11,8 @@ interface APIKey {
   created_at: string
 }
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+
 export default function SettingsPage() {
   const { data: session } = useSession()
   const [activeTab, setActiveTab] = useState('profile')
@@ -18,13 +20,22 @@ export default function SettingsPage() {
   const [loadingKeys, setLoadingKeys] = useState(false)
   const [showCreateKey, setShowCreateKey] = useState(false)
   const [newKeyName, setNewKeyName] = useState('')
+  const [newlyCreatedKey, setNewlyCreatedKey] = useState<string | null>(null)
   const [copiedKey, setCopiedKey] = useState<string | null>(null)
   const [saving, setSaving] = useState(false)
   const [saveSuccess, setSaveSuccess] = useState(false)
+  const [error, setError] = useState<string | null>(null)
 
   // Profile form state
   const [name, setName] = useState(session?.user?.name || '')
   const [email, setEmail] = useState(session?.user?.email || '')
+
+  // Password change state
+  const [currentPassword, setCurrentPassword] = useState('')
+  const [newPassword, setNewPassword] = useState('')
+  const [confirmPassword, setConfirmPassword] = useState('')
+  const [passwordError, setPasswordError] = useState<string | null>(null)
+  const [passwordSuccess, setPasswordSuccess] = useState(false)
 
   // Notification settings
   const [notifications, setNotifications] = useState({
@@ -33,6 +44,11 @@ export default function SettingsPage() {
     weeklyDigest: false,
   })
 
+  const getAuthHeader = () => {
+    const token = (session as any)?.accessToken
+    return token ? { Authorization: `Bearer ${token}` } : {}
+  }
+
   useEffect(() => {
     if (session?.user) {
       setName(session.user.name || '')
@@ -40,39 +56,133 @@ export default function SettingsPage() {
     }
   }, [session])
 
+  // Fetch API keys when tab is selected
+  useEffect(() => {
+    if (activeTab === 'api-keys' && session) {
+      fetchApiKeys()
+    }
+  }, [activeTab, session])
+
+  const fetchApiKeys = async () => {
+    setLoadingKeys(true)
+    try {
+      const response = await fetch(`${API_URL}/v1/auth/api-keys`, {
+        headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+      })
+      if (response.ok) {
+        const data = await response.json()
+        setApiKeys(data)
+      }
+    } catch (err) {
+      console.error('Failed to fetch API keys:', err)
+    } finally {
+      setLoadingKeys(false)
+    }
+  }
+
   const handleSaveProfile = async () => {
     setSaving(true)
-    // Simulate API call
-    await new Promise(resolve => setTimeout(resolve, 1000))
-    setSaving(false)
-    setSaveSuccess(true)
-    setTimeout(() => setSaveSuccess(false), 3000)
+    setError(null)
+    try {
+      const response = await fetch(`${API_URL}/v1/auth/me`, {
+        method: 'PATCH',
+        headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name }),
+      })
+      if (response.ok) {
+        setSaveSuccess(true)
+        setTimeout(() => setSaveSuccess(false), 3000)
+      } else {
+        const data = await response.json()
+        setError(data.detail || 'Failed to update profile')
+      }
+    } catch (err) {
+      setError('Network error. Please try again.')
+    } finally {
+      setSaving(false)
+    }
   }
 
   const handleCreateApiKey = async () => {
     if (!newKeyName.trim()) return
+    setError(null)
 
-    const newKey: APIKey = {
-      id: `key_${Date.now()}`,
-      name: newKeyName,
-      key: `gk_${Math.random().toString(36).substring(2)}${Math.random().toString(36).substring(2)}`,
-      created_at: new Date().toISOString(),
+    try {
+      const response = await fetch(`${API_URL}/v1/auth/api-keys`, {
+        method: 'POST',
+        headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: newKeyName }),
+      })
+      if (response.ok) {
+        const newKey = await response.json()
+        setApiKeys([...apiKeys, newKey])
+        setNewlyCreatedKey(newKey.key) // Show full key only once
+        setNewKeyName('')
+      } else {
+        const data = await response.json()
+        setError(data.detail || 'Failed to create API key')
+        setShowCreateKey(false)
+      }
+    } catch (err) {
+      setError('Network error. Please try again.')
+      setShowCreateKey(false)
     }
-
-    setApiKeys([...apiKeys, newKey])
-    setNewKeyName('')
-    setShowCreateKey(false)
   }
 
-  const handleDeleteApiKey = (keyId: string) => {
+  const handleDeleteApiKey = async (keyId: string) => {
     if (!confirm('Are you sure you want to delete this API key? This action cannot be undone.')) return
-    setApiKeys(apiKeys.filter(k => k.id !== keyId))
+
+    try {
+      const response = await fetch(`${API_URL}/v1/auth/api-keys/${keyId}`, {
+        method: 'DELETE',
+        headers: getAuthHeader(),
+      })
+      if (response.ok || response.status === 204) {
+        setApiKeys(apiKeys.filter(k => k.id !== keyId))
+      }
+    } catch (err) {
+      console.error('Failed to delete API key:', err)
+    }
   }
 
   const handleCopyKey = (key: string) => {
     navigator.clipboard.writeText(key)
     setCopiedKey(key)
     setTimeout(() => setCopiedKey(null), 2000)
+  }
+
+  const handleChangePassword = async () => {
+    setPasswordError(null)
+    setPasswordSuccess(false)
+
+    if (newPassword !== confirmPassword) {
+      setPasswordError('Passwords do not match')
+      return
+    }
+    if (newPassword.length < 8) {
+      setPasswordError('Password must be at least 8 characters')
+      return
+    }
+
+    try {
+      const response = await fetch(`${API_URL}/v1/auth/me`, {
+        method: 'PATCH',
+        headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
+        body: JSON.stringify({ password: newPassword }),
+      })
+      if (response.ok) {
+        setPasswordSuccess(true)
+        setCurrentPassword('')
+        setNewPassword('')
+        setConfirmPassword('')
+        setTimeout(() => setPasswordSuccess(false), 3000)
+      } else {
+        const data = await response.json()
+        setPasswordError(data.detail || 'Failed to update password')
+      }
+    } catch (err) {
+      setPasswordError('Network error. Please try again.')
+    }
   }
 
   const tabs = [
@@ -327,10 +437,23 @@ export default function SettingsPage() {
                 <div>
                   <h3 className="font-medium mb-2">Change Password</h3>
                   <div className="space-y-3 max-w-md">
+                    {passwordError && (
+                      <div className="p-3 text-sm text-red-500 bg-red-50 dark:bg-red-950 rounded-md">
+                        {passwordError}
+                      </div>
+                    )}
+                    {passwordSuccess && (
+                      <div className="p-3 text-sm text-green-500 bg-green-50 dark:bg-green-950 rounded-md flex items-center gap-2">
+                        <CheckCircle2 className="h-4 w-4" />
+                        Password updated successfully
+                      </div>
+                    )}
                     <div>
                       <label className="block text-sm font-medium mb-1">Current Password</label>
                       <input
                         type="password"
+                        value={currentPassword}
+                        onChange={(e) => setCurrentPassword(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md bg-background"
                         placeholder="••••••••"
                       />
@@ -339,6 +462,8 @@ export default function SettingsPage() {
                       <label className="block text-sm font-medium mb-1">New Password</label>
                       <input
                         type="password"
+                        value={newPassword}
+                        onChange={(e) => setNewPassword(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md bg-background"
                         placeholder="••••••••"
                       />
@@ -347,11 +472,13 @@ export default function SettingsPage() {
                       <label className="block text-sm font-medium mb-1">Confirm New Password</label>
                       <input
                         type="password"
+                        value={confirmPassword}
+                        onChange={(e) => setConfirmPassword(e.target.value)}
                         className="w-full px-3 py-2 border rounded-md bg-background"
                         placeholder="••••••••"
                       />
                     </div>
-                    <Button>Update Password</Button>
+                    <Button onClick={handleChangePassword}>Update Password</Button>
                   </div>
                 </div>
 
