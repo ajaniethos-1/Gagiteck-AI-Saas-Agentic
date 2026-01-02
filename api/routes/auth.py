@@ -59,7 +59,12 @@ class TokenData(BaseModel):
 class UserUpdate(BaseModel):
     """Update user request."""
     name: Optional[str] = None
-    password: Optional[str] = None
+
+
+class PasswordChange(BaseModel):
+    """Password change request."""
+    current_password: str = Field(..., description="Current password for verification")
+    new_password: str = Field(..., min_length=8, description="New password (min 8 characters)")
 
 
 class APIKeyCreate(BaseModel):
@@ -214,9 +219,30 @@ async def update_me(request: UserUpdate, current_user: User = Depends(get_curren
 
     if request.name:
         user["name"] = request.name
-    if request.password:
-        user["password_hash"] = hash_password(request.password)
 
+    user["updated_at"] = datetime.utcnow()
+
+    return User(**{k: v for k, v in user.items() if k != "password_hash"})
+
+
+@router.post(
+    "/me/password",
+    response_model=User,
+    summary="Change password",
+    description="Change the current user's password. Requires current password verification.",
+)
+async def change_password(request: PasswordChange, current_user: User = Depends(get_current_user)):
+    """Change current user's password with verification."""
+    user = _users_db.get(current_user.id)
+    if not user:
+        raise HTTPException(status_code=404, detail="User not found")
+
+    # Verify current password
+    if not verify_password(request.current_password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Current password is incorrect")
+
+    # Update password
+    user["password_hash"] = hash_password(request.new_password)
     user["updated_at"] = datetime.utcnow()
 
     return User(**{k: v for k, v in user.items() if k != "password_hash"})
