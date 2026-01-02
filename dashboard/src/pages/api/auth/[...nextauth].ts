@@ -2,10 +2,21 @@ import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 
+// Production app URL - hardcoded as fallback when env vars not set
+const PRODUCTION_APP_URL = "https://app.mimoai.co";
+
 // Get the base URL for redirects - use custom domain, not ALB
 const getBaseUrl = () => {
+  // Explicit env var takes priority
   if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
   if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+
+  // In production (NODE_ENV=production or running on AWS), use production URL
+  if (process.env.NODE_ENV === "production") {
+    return PRODUCTION_APP_URL;
+  }
+
+  // Local development fallback
   return "http://localhost:3000";
 };
 
