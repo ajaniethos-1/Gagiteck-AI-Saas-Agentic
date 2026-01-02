@@ -171,6 +171,11 @@ Authorization: Bearer your-api-key
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
+# Security headers middleware (SOC2 compliance)
+from api.middleware.security import SecurityHeadersMiddleware, RequestIDMiddleware
+app.add_middleware(SecurityHeadersMiddleware)
+app.add_middleware(RequestIDMiddleware)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,

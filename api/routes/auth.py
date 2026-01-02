@@ -1,8 +1,9 @@
 """Authentication API endpoints."""
 
+import hashlib
 from datetime import datetime, timedelta
 from typing import Optional
-from fastapi import APIRouter, HTTPException, Depends, status
+from fastapi import APIRouter, HTTPException, Depends, status, Request
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel, EmailStr, Field
 from passlib.context import CryptContext
@@ -10,12 +11,17 @@ from jose import JWTError, jwt
 import uuid
 
 from api.config import settings
+from api.services.audit import audit_logger, AuditEventType
 
 router = APIRouter()
 security = HTTPBearer()
 # Use bcrypt_sha256 to avoid bcrypt's 72-byte password limit.
 # bcrypt_sha256 pre-hashes with SHA256 before bcrypt, supporting any length password.
 pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
+
+
+# --- Account Lockout Tracking ---
+_failed_login_attempts: dict[str, dict] = {}  # email -> {count, locked_until}
 
 
 # --- Models ---
@@ -97,6 +103,62 @@ def verify_password(plain_password: str, hashed_password: str) -> bool:
     return pwd_context.verify(plain_password, hashed_password)
 
 
+def hash_api_key(api_key: str) -> str:
+    """Hash an API key using SHA-256 for secure storage."""
+    return hashlib.sha256(api_key.encode()).hexdigest()
+
+
+def get_client_ip(request: Request) -> str:
+    """Extract client IP address from request."""
+    forwarded = request.headers.get("X-Forwarded-For")
+    if forwarded:
+        return forwarded.split(",")[0].strip()
+    return request.client.host if request.client else "unknown"
+
+
+def check_account_lockout(email: str) -> None:
+    """Check if account is locked due to failed login attempts."""
+    lockout_info = _failed_login_attempts.get(email)
+    if not lockout_info:
+        return
+
+    if lockout_info.get("locked_until"):
+        if datetime.utcnow() < lockout_info["locked_until"]:
+            remaining = (lockout_info["locked_until"] - datetime.utcnow()).seconds // 60
+            raise HTTPException(
+                status_code=429,
+                detail=f"Account temporarily locked. Try again in {remaining + 1} minutes."
+            )
+        else:
+            # Lockout expired, reset
+            _failed_login_attempts.pop(email, None)
+
+
+def record_failed_login(email: str, ip_address: str) -> None:
+    """Record a failed login attempt and lock account if threshold exceeded."""
+    if email not in _failed_login_attempts:
+        _failed_login_attempts[email] = {"count": 0, "locked_until": None}
+
+    _failed_login_attempts[email]["count"] += 1
+    count = _failed_login_attempts[email]["count"]
+
+    if count >= settings.MAX_LOGIN_ATTEMPTS:
+        locked_until = datetime.utcnow() + timedelta(minutes=settings.LOCKOUT_DURATION_MINUTES)
+        _failed_login_attempts[email]["locked_until"] = locked_until
+
+        # Log account lockout
+        audit_logger.log_account_locked(
+            user_email=email,
+            ip_address=ip_address,
+            failed_attempts=count,
+        )
+
+
+def clear_failed_login(email: str) -> None:
+    """Clear failed login attempts after successful login."""
+    _failed_login_attempts.pop(email, None)
+
+
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
     """Create a JWT access token."""
     to_encode = data.copy()
@@ -124,11 +186,13 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
 
     # Check if it's an API key
     if token.startswith(settings.API_KEY_PREFIX):
-        api_key = next((k for k in _api_keys_db.values() if k["key"] == token), None)
+        # Hash the provided key and compare with stored hashes
+        token_hash = hash_api_key(token)
+        api_key = next((k for k in _api_keys_db.values() if k["key_hash"] == token_hash), None)
         if api_key:
             user = _users_db.get(api_key["user_id"])
             if user:
-                return User(**user)
+                return User(**{k: v for k, v in user.items() if k != "password_hash"})
         raise HTTPException(status_code=401, detail="Invalid API key")
 
     # JWT token
@@ -136,7 +200,7 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     user = _users_db.get(token_data.user_id)
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
-    return User(**user)
+    return User(**{k: v for k, v in user.items() if k != "password_hash"})
 
 
 # --- Endpoints ---
@@ -148,8 +212,10 @@ async def get_current_user(credentials: HTTPAuthorizationCredentials = Depends(s
     summary="Create account",
     description="Create a new user account.",
 )
-async def signup(request: UserCreate):
+async def signup(request: UserCreate, req: Request):
     """Create a new user account."""
+    ip_address = get_client_ip(req)
+
     # Check if email already exists
     if any(u["email"] == request.email for u in _users_db.values()):
         raise HTTPException(status_code=400, detail="Email already registered")
@@ -168,6 +234,14 @@ async def signup(request: UserCreate):
     }
 
     _users_db[user_id] = user
+
+    # Audit log
+    audit_logger.log_signup(
+        user_id=user_id,
+        user_email=request.email,
+        ip_address=ip_address,
+    )
+
     return User(**{k: v for k, v in user.items() if k != "password_hash"})
 
 
@@ -177,15 +251,46 @@ async def signup(request: UserCreate):
     summary="Login",
     description="Authenticate and receive a JWT token.",
 )
-async def login(request: UserLogin):
+async def login(request: UserLogin, req: Request):
     """Authenticate user and return JWT token."""
+    ip_address = get_client_ip(req)
+    user_agent = req.headers.get("user-agent", "unknown")
+
+    # Check account lockout
+    check_account_lockout(request.email)
+
     user = next((u for u in _users_db.values() if u["email"] == request.email), None)
 
     if not user or not verify_password(request.password, user["password_hash"]):
+        # Record failed login attempt
+        record_failed_login(request.email, ip_address)
+
+        # Audit log failed login
+        audit_logger.log_login(
+            user_id=user["id"] if user else None,
+            user_email=request.email,
+            ip_address=ip_address,
+            user_agent=user_agent,
+            success=False,
+            failure_reason="Invalid credentials",
+        )
+
         raise HTTPException(status_code=401, detail="Invalid email or password")
+
+    # Clear failed login attempts on successful login
+    clear_failed_login(request.email)
 
     access_token = create_access_token(
         data={"sub": user["id"], "email": user["email"]}
+    )
+
+    # Audit log successful login
+    audit_logger.log_login(
+        user_id=user["id"],
+        user_email=user["email"],
+        ip_address=ip_address,
+        user_agent=user_agent,
+        success=True,
     )
 
     return Token(
@@ -231,8 +336,13 @@ async def update_me(request: UserUpdate, current_user: User = Depends(get_curren
     summary="Change password",
     description="Change the current user's password. Requires current password verification.",
 )
-async def change_password(request: PasswordChange, current_user: User = Depends(get_current_user)):
+async def change_password(
+    request: PasswordChange,
+    req: Request,
+    current_user: User = Depends(get_current_user),
+):
     """Change current user's password with verification."""
+    ip_address = get_client_ip(req)
     user = _users_db.get(current_user.id)
     if not user:
         raise HTTPException(status_code=404, detail="User not found")
@@ -245,6 +355,13 @@ async def change_password(request: PasswordChange, current_user: User = Depends(
     user["password_hash"] = hash_password(request.new_password)
     user["updated_at"] = datetime.utcnow()
 
+    # Audit log password change
+    audit_logger.log_password_change(
+        user_id=current_user.id,
+        user_email=current_user.email,
+        ip_address=ip_address,
+    )
+
     return User(**{k: v for k, v in user.items() if k != "password_hash"})
 
 
@@ -255,22 +372,40 @@ async def change_password(request: PasswordChange, current_user: User = Depends(
     summary="Create API key",
     description="Create a new API key for programmatic access.",
 )
-async def create_api_key(request: APIKeyCreate, current_user: User = Depends(get_current_user)):
+async def create_api_key(
+    request: APIKeyCreate,
+    req: Request,
+    current_user: User = Depends(get_current_user),
+):
     """Create a new API key."""
+    ip_address = get_client_ip(req)
     key_id = f"key_{uuid.uuid4().hex[:12]}"
     api_key = f"{settings.API_KEY_PREFIX}{uuid.uuid4().hex}"
     now = datetime.utcnow()
 
+    # Store only the hash, not the raw key
     key_data = {
         "id": key_id,
         "name": request.name,
-        "key": api_key,
+        "key_hash": hash_api_key(api_key),  # Store hash only
+        "key_prefix": api_key[:12],  # Store prefix for display
         "user_id": current_user.id,
         "created_at": now,
     }
 
     _api_keys_db[key_id] = key_data
-    return APIKey(**key_data)
+
+    # Audit log
+    audit_logger.log_api_key_created(
+        user_id=current_user.id,
+        user_email=current_user.email,
+        key_id=key_id,
+        key_name=request.name,
+        ip_address=ip_address,
+    )
+
+    # Return the full key only once (user must save it)
+    return APIKey(id=key_id, name=request.name, key=api_key, created_at=now)
 
 
 @router.get(
@@ -282,7 +417,12 @@ async def create_api_key(request: APIKeyCreate, current_user: User = Depends(get
 async def list_api_keys(current_user: User = Depends(get_current_user)):
     """List user's API keys."""
     keys = [
-        APIKey(**{**k, "key": k["key"][:12] + "..."})
+        APIKey(
+            id=k["id"],
+            name=k["name"],
+            key=k.get("key_prefix", "ggt_***") + "...",  # Show prefix only
+            created_at=k["created_at"],
+        )
         for k in _api_keys_db.values()
         if k["user_id"] == current_user.id
     ]
@@ -295,9 +435,23 @@ async def list_api_keys(current_user: User = Depends(get_current_user)):
     summary="Delete API key",
     description="Revoke an API key.",
 )
-async def delete_api_key(key_id: str, current_user: User = Depends(get_current_user)):
+async def delete_api_key(
+    key_id: str,
+    req: Request,
+    current_user: User = Depends(get_current_user),
+):
     """Delete an API key."""
+    ip_address = get_client_ip(req)
     key = _api_keys_db.get(key_id)
     if not key or key["user_id"] != current_user.id:
         raise HTTPException(status_code=404, detail="API key not found")
+
     del _api_keys_db[key_id]
+
+    # Audit log
+    audit_logger.log_api_key_deleted(
+        user_id=current_user.id,
+        user_email=current_user.email,
+        key_id=key_id,
+        ip_address=ip_address,
+    )
