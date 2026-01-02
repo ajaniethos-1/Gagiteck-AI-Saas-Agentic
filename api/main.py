@@ -9,7 +9,7 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-from api.routes import agents, workflows, executions, health, auth
+from api.routes import agents, workflows, executions, health, auth, webhooks, search, rbac
 from api.config import settings
 
 # Configure logging
@@ -152,6 +152,18 @@ Authorization: Bearer your-api-key
             "name": "Executions",
             "description": "Monitor and control running executions",
         },
+        {
+            "name": "Webhooks",
+            "description": "Configure webhook notifications for events",
+        },
+        {
+            "name": "Search",
+            "description": "Search across all resources",
+        },
+        {
+            "name": "Access Control",
+            "description": "Roles, permissions, and team management",
+        },
     ],
 )
 
@@ -174,6 +186,9 @@ app.include_router(auth.router, prefix="/v1/auth", tags=["Authentication"])
 app.include_router(agents.router, prefix="/v1/agents", tags=["Agents"])
 app.include_router(workflows.router, prefix="/v1/workflows", tags=["Workflows"])
 app.include_router(executions.router, prefix="/v1/executions", tags=["Executions"])
+app.include_router(webhooks.router, prefix="/v1/webhooks", tags=["Webhooks"])
+app.include_router(search.router, prefix="/v1/search", tags=["Search"])
+app.include_router(rbac.router, prefix="/v1/access", tags=["Access Control"])
 
 
 def run():

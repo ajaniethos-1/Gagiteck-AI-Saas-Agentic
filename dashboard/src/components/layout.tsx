@@ -4,6 +4,7 @@ import { useSession, signOut } from 'next-auth/react'
 import { Bot, Workflow, Zap, Settings, Home, Menu, LogOut, User } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { GlobalSearch } from '@/components/search'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -88,7 +89,9 @@ export function Layout({ children }: { children: React.ReactNode }) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex-1" />
+          <div className="flex-1">
+            <GlobalSearch />
+          </div>
 
           <Button variant="outline" size="sm">
             Documentation
