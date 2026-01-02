@@ -13,7 +13,9 @@ from api.config import settings
 
 router = APIRouter()
 security = HTTPBearer()
-pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+# Use bcrypt_sha256 to avoid bcrypt's 72-byte password limit.
+# bcrypt_sha256 pre-hashes with SHA256 before bcrypt, supporting any length password.
+pwd_context = CryptContext(schemes=["bcrypt_sha256"], deprecated="auto")
 
 
 # --- Models ---
@@ -80,20 +82,14 @@ _api_keys_db: dict[str, dict] = {}
 
 # --- Helper functions ---
 
-def _truncate_password(password: str) -> str:
-    """Truncate password to 72 bytes for bcrypt compatibility."""
-    encoded = password.encode('utf-8')[:72]
-    return encoded.decode('utf-8', errors='ignore')
-
-
 def hash_password(password: str) -> str:
-    """Hash a password (truncated to 72 bytes for bcrypt)."""
-    return pwd_context.hash(_truncate_password(password))
+    """Hash a password using bcrypt_sha256."""
+    return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
     """Verify a password against its hash."""
-    return pwd_context.verify(_truncate_password(plain_password), hashed_password)
+    return pwd_context.verify(plain_password, hashed_password)
 
 
 def create_access_token(data: dict, expires_delta: Optional[timedelta] = None) -> str:
