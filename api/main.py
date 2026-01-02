@@ -1,5 +1,6 @@
 """Gagiteck REST API - Main Application."""
 
+import logging
 from contextlib import asynccontextmanager
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
@@ -11,6 +12,31 @@ from slowapi.errors import RateLimitExceeded
 from api.routes import agents, workflows, executions, health, auth
 from api.config import settings
 
+# Configure logging
+logging.basicConfig(
+    level=logging.DEBUG if settings.DEBUG else logging.INFO,
+    format="%(asctime)s - %(name)s - %(levelname)s - %(message)s",
+)
+logger = logging.getLogger(__name__)
+
+# Initialize Sentry if DSN is configured
+if settings.SENTRY_DSN:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.integrations.sqlalchemy import SqlalchemyIntegration
+
+    sentry_sdk.init(
+        dsn=settings.SENTRY_DSN,
+        environment=settings.ENVIRONMENT,
+        traces_sample_rate=settings.SENTRY_TRACES_SAMPLE_RATE,
+        integrations=[
+            FastApiIntegration(transaction_style="endpoint"),
+            SqlalchemyIntegration(),
+        ],
+        send_default_pii=False,
+    )
+    logger.info("Sentry error tracking initialized")
+
 # Rate limiter
 limiter = Limiter(key_func=get_remote_address)
 
@@ -19,10 +45,44 @@ limiter = Limiter(key_func=get_remote_address)
 async def lifespan(app: FastAPI):
     """Application lifespan events."""
     # Startup
-    print(f"Starting Gagiteck API v{settings.VERSION}")
+    logger.info(f"Starting Gagiteck API v{settings.VERSION} ({settings.ENVIRONMENT})")
+
+    # Initialize database
+    try:
+        from api.db import init_db
+        await init_db()
+        logger.info("Database initialized")
+    except Exception as e:
+        logger.warning(f"Database initialization skipped: {e}")
+
+    # Initialize Redis cache
+    try:
+        from api.services.cache import get_cache
+        await get_cache()
+        logger.info("Redis cache connected")
+    except Exception as e:
+        logger.warning(f"Redis connection skipped: {e}")
+
     yield
+
     # Shutdown
-    print("Shutting down Gagiteck API")
+    logger.info("Shutting down Gagiteck API")
+
+    # Close database
+    try:
+        from api.db import close_db
+        await close_db()
+        logger.info("Database connection closed")
+    except Exception:
+        pass
+
+    # Close Redis
+    try:
+        from api.services.cache import close_cache
+        await close_cache()
+        logger.info("Redis connection closed")
+    except Exception:
+        pass
 
 
 app = FastAPI(
