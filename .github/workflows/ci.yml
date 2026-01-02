@@ -85,10 +85,16 @@ jobs:
       - name: Run API tests
         env:
           PYTHONPATH: ${{ github.workspace }}
-        run: pytest tests/ -v --cov=. --cov-report=xml
+        run: pytest tests/ -v --tb=short 2>&1 || true
+
+      - name: Run API tests with coverage
+        env:
+          PYTHONPATH: ${{ github.workspace }}
+        run: pytest tests/ -v --cov=. --cov-report=xml --tb=short
 
       - name: Upload coverage
         uses: codecov/codecov-action@v3
+        if: always()
         with:
           files: api/coverage.xml
           fail_ci_if_error: false
