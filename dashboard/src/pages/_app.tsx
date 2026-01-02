@@ -3,6 +3,7 @@ import type { AppProps } from 'next/app'
 import { SessionProvider, useSession } from 'next-auth/react'
 import { useRouter } from 'next/router'
 import { Layout } from '@/components/layout'
+import { ThemeProvider } from '@/components/theme-provider'
 import { Loader2 } from 'lucide-react'
 
 // Pages that don't require authentication
@@ -44,16 +45,18 @@ export default function App({ Component, pageProps: { session, ...pageProps } }:
   const isPublicPage = publicPages.includes(router.pathname)
 
   return (
-    <SessionProvider session={session}>
-      <AuthWrapper>
-        {isPublicPage ? (
-          <Component {...pageProps} />
-        ) : (
-          <Layout>
+    <ThemeProvider>
+      <SessionProvider session={session}>
+        <AuthWrapper>
+          {isPublicPage ? (
             <Component {...pageProps} />
-          </Layout>
-        )}
-      </AuthWrapper>
-    </SessionProvider>
+          ) : (
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          )}
+        </AuthWrapper>
+      </SessionProvider>
+    </ThemeProvider>
   )
 }

@@ -1,6 +1,8 @@
 import { useState } from 'react'
+import Link from 'next/link'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
+import { OnboardingChecklist } from '@/components/onboarding'
 import { Bot, Workflow, Zap, TrendingUp } from 'lucide-react'
 
 export default function Dashboard() {
@@ -20,8 +22,11 @@ export default function Dashboard() {
         </p>
       </div>
 
+      {/* Onboarding Checklist */}
+      <OnboardingChecklist />
+
       {/* Stats Grid */}
-      <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
+      <div className="grid gap-4 grid-cols-2 lg:grid-cols-4">
         <Card>
           <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <CardTitle className="text-sm font-medium">Total Agents</CardTitle>
@@ -73,19 +78,25 @@ export default function Dashboard() {
           <CardTitle>Quick Actions</CardTitle>
           <CardDescription>Common tasks to get started</CardDescription>
         </CardHeader>
-        <CardContent className="flex gap-4">
-          <Button>
-            <Bot className="mr-2 h-4 w-4" />
-            Create Agent
-          </Button>
-          <Button variant="outline">
-            <Workflow className="mr-2 h-4 w-4" />
-            New Workflow
-          </Button>
-          <Button variant="outline">
-            <Zap className="mr-2 h-4 w-4" />
-            Run Agent
-          </Button>
+        <CardContent className="flex flex-wrap gap-2 sm:gap-4">
+          <Link href="/agents">
+            <Button>
+              <Bot className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">Create</span> Agent
+            </Button>
+          </Link>
+          <Link href="/workflows">
+            <Button variant="outline">
+              <Workflow className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">New</span> Workflow
+            </Button>
+          </Link>
+          <Link href="/executions">
+            <Button variant="outline">
+              <Zap className="mr-2 h-4 w-4" />
+              <span className="hidden sm:inline">View</span> Executions
+            </Button>
+          </Link>
         </CardContent>
       </Card>
 
