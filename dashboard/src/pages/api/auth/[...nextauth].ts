@@ -5,11 +5,21 @@ import GithubProvider from "next-auth/providers/github";
 // Production app URL - hardcoded as fallback when env vars not set
 const PRODUCTION_APP_URL = "https://app.mimoai.co";
 
+// Check if URL is an AWS ALB/ELB URL that should be rejected
+const isAlbUrl = (url: string | undefined): boolean => {
+  if (!url) return false;
+  return url.includes(".elb.amazonaws.com") || url.includes(".alb.amazonaws.com");
+};
+
 // Get the base URL for redirects - use custom domain, not ALB
 const getBaseUrl = () => {
-  // Explicit env var takes priority
-  if (process.env.NEXTAUTH_URL) return process.env.NEXTAUTH_URL;
-  if (process.env.NEXT_PUBLIC_APP_URL) return process.env.NEXT_PUBLIC_APP_URL;
+  // Use NEXTAUTH_URL only if it's NOT an ALB URL
+  if (process.env.NEXTAUTH_URL && !isAlbUrl(process.env.NEXTAUTH_URL)) {
+    return process.env.NEXTAUTH_URL;
+  }
+  if (process.env.NEXT_PUBLIC_APP_URL && !isAlbUrl(process.env.NEXT_PUBLIC_APP_URL)) {
+    return process.env.NEXT_PUBLIC_APP_URL;
+  }
 
   // In production (NODE_ENV=production or running on AWS), use production URL
   if (process.env.NODE_ENV === "production") {
