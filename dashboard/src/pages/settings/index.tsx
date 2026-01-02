@@ -155,6 +155,10 @@ export default function SettingsPage() {
     setPasswordError(null)
     setPasswordSuccess(false)
 
+    if (!currentPassword) {
+      setPasswordError('Current password is required')
+      return
+    }
     if (newPassword !== confirmPassword) {
       setPasswordError('Passwords do not match')
       return
@@ -165,10 +169,13 @@ export default function SettingsPage() {
     }
 
     try {
-      const response = await fetch(`${API_URL}/v1/auth/me`, {
-        method: 'PATCH',
+      const response = await fetch(`${API_URL}/v1/auth/me/password`, {
+        method: 'POST',
         headers: { ...getAuthHeader(), 'Content-Type': 'application/json' },
-        body: JSON.stringify({ password: newPassword }),
+        body: JSON.stringify({
+          current_password: currentPassword,
+          new_password: newPassword
+        }),
       })
       if (response.ok) {
         setPasswordSuccess(true)
