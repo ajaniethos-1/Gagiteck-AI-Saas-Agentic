@@ -1,11 +1,18 @@
 """Gagiteck REST API - Main Application."""
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
+from slowapi import Limiter, _rate_limit_exceeded_handler
+from slowapi.util import get_remote_address
+from slowapi.errors import RateLimitExceeded
 
-from api.routes import agents, workflows, executions, health
+from api.routes import agents, workflows, executions, health, auth
 from api.config import settings
+
+# Rate limiter
+limiter = Limiter(key_func=get_remote_address)
 
 
 @asynccontextmanager
@@ -70,6 +77,10 @@ Authorization: Bearer your-api-key
             "description": "Health check and status endpoints",
         },
         {
+            "name": "Authentication",
+            "description": "User registration, login, and API key management",
+        },
+        {
             "name": "Agents",
             "description": "Create and manage AI agents with tools and memory",
         },
@@ -84,6 +95,10 @@ Authorization: Bearer your-api-key
     ],
 )
 
+# Rate limiter
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
 # CORS middleware
 app.add_middleware(
     CORSMiddleware,
@@ -95,6 +110,7 @@ app.add_middleware(
 
 # Include routers
 app.include_router(health.router, tags=["Health"])
+app.include_router(auth.router, prefix="/v1/auth", tags=["Authentication"])
 app.include_router(agents.router, prefix="/v1/agents", tags=["Agents"])
 app.include_router(workflows.router, prefix="/v1/workflows", tags=["Workflows"])
 app.include_router(executions.router, prefix="/v1/executions", tags=["Executions"])
