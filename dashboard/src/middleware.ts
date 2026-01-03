@@ -1,33 +1,43 @@
 import { withAuth } from "next-auth/middleware";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
 
-export default withAuth(
-  function middleware(req) {
-    // If we get here, user is authenticated
-    return NextResponse.next();
-  },
-  {
-    callbacks: {
-      authorized: ({ token }) => !!token,
-    },
-    pages: {
-      signIn: "/auth/signin",
-    },
+// Public paths that don't require authentication
+const publicPaths = [
+  "/auth/signin",
+  "/auth/signup",
+  "/auth/error",
+  "/api/auth",
+];
+
+export function middleware(request: NextRequest) {
+  const { pathname } = request.nextUrl;
+
+  // Skip auth for public paths
+  for (const path of publicPaths) {
+    if (pathname.startsWith(path)) {
+      return NextResponse.next();
+    }
   }
-);
 
-// Protect all routes except auth pages and public assets
+  // Skip auth for static files
+  if (
+    pathname.startsWith("/_next") ||
+    pathname.startsWith("/favicon") ||
+    pathname.startsWith("/robots")
+  ) {
+    return NextResponse.next();
+  }
+
+  // For all other routes, use withAuth
+  return (withAuth as any)(request);
+}
+
 export const config = {
   matcher: [
     /*
-     * Match all request paths except:
-     * - /auth/signin (sign in page)
-     * - /auth/signup (sign up page)
-     * - /auth/error (error page)
-     * - /api/auth/* (NextAuth API routes)
-     * - /_next/* (Next.js internals)
-     * - /favicon.ico, /robots.txt (static files)
+     * Match all request paths except static files
      */
-    "/((?!auth/signin|auth/signup|auth/error|api/auth|_next/static|_next/image|favicon.ico|robots.txt).*)",
+    "/((?!_next/static|_next/image|favicon.ico).*)",
   ],
 };
