@@ -3,7 +3,7 @@ import CredentialsProvider from "next-auth/providers/credentials";
 import GithubProvider from "next-auth/providers/github";
 
 // Production app URL - hardcoded as fallback when env vars not set
-const PRODUCTION_APP_URL = "https://app.mimoai.co";
+const PRODUCTION_APP_URL = "https://www.mimoai.co";
 
 // Check if URL is an AWS ALB/ELB URL that should be rejected
 const isAlbUrl = (url: string | undefined): boolean => {
