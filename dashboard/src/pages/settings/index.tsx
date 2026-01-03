@@ -44,7 +44,7 @@ export default function SettingsPage() {
     weeklyDigest: false,
   })
 
-  const getAuthHeader = () => {
+  const getAuthHeader = (): Record<string, string> => {
     const token = (session as any)?.accessToken
     return token ? { Authorization: `Bearer ${token}` } : {}
   }
