@@ -1,4 +1,8 @@
-name: Deploy to AWS
+# Disabled - using AWS Amplify instead
+on:
+  workflow_dispatch:  # Manual trigger only
+
+name: Deploy to AWS - 
 
 on:
   push:
