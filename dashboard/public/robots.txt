@@ -1,0 +1,54 @@
+﻿# robots.txt for mimoai.co
+# AI SaaS Platform - Search Engine and AI Crawler Configuration
+
+# Allow all major search engines
+User-agent: Googlebot
+User-agent: Bingbot
+User-agent: Slurp
+User-agent: DuckDuckBot
+User-agent: Baiduspider
+User-agent: YandexBot
+Allow: /
+
+# Allow AI crawlers and semantic search
+User-agent: GPTBot
+User-agent: ChatGPT-User
+User-agent: Claude-Web
+User-agent: ClaudeBot
+User-agent: Perplexity
+User-agent: PerplexityBot
+User-agent: Anthropic-AI
+Allow: /
+
+# Allow other AI platforms
+User-agent: Google-Extended
+User-agent: CCBot
+User-agent: anthropic-ai
+User-agent: cohere-ai
+Allow: /
+
+# Block admin and internal areas
+User-agent: *
+Disallow: /admin/
+Disallow: /api/
+Disallow: /dashboard/private/
+Disallow: /.git/
+Disallow: /config/
+Disallow: /logs/
+Disallow: /tmp/
+Disallow: /*.json$
+Disallow: /*.xml$
+Disallow: /*.env$
+
+# Allow public areas
+Allow: /docs/
+Allow: /dashboard/
+Allow: /sdk/
+Allow: /api/docs/
+
+# Sitemap location
+Sitemap: https://www.mimoai.co/sitemap.xml
+
+# Crawl delay for aggressive bots
+User-agent: *
+Crawl-delay: 1
