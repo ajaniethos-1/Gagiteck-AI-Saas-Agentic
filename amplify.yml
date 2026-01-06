@@ -1,6 +1,7 @@
 version: 1
 applications:
   - appRoot: dashboard
+    framework: nextjs
     frontend:
       phases:
         preBuild:
@@ -16,3 +17,4 @@ applications:
       cache:
         paths:
           - node_modules/**/*
+          - .next/cache/**/*
