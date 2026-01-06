@@ -1,0 +1,19 @@
+version: 1
+applications:
+  - frontend:
+      phases:
+        preBuild:
+          commands:
+            - cd dashboard
+            - npm ci
+        build:
+          commands:
+            - npm run build
+      artifacts:
+        baseDirectory: dashboard/.next
+        files:
+          - '**/*'
+      cache:
+        paths:
+          - dashboard/node_modules/**/*
+    appRoot: dashboard
