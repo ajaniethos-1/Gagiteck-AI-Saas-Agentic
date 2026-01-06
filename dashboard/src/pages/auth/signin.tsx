@@ -6,6 +6,7 @@ import { authOptions } from "../api/auth/[...nextauth]";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Github, Mail, Lock, Loader2 } from "lucide-react";
+import Link from "next/link";
 
 interface SignInProps {
   providers: Awaited<ReturnType<typeof getProviders>>;
@@ -125,7 +126,10 @@ export default function SignIn({ providers }: SignInProps) {
           </form>
 
           <p className="text-center text-sm text-muted-foreground">
-            Demo: admin@gagiteck.com / admin123
+            Don't have an account?{" "}
+            <Link href="/auth/signup" className="text-primary hover:underline font-medium">
+              Sign up
+            </Link>
           </p>
         </CardContent>
       </Card>

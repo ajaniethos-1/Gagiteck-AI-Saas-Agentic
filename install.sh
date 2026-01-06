@@ -13,8 +13,8 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-REPO_NAME="gagiteck-assets"
-REPO_URL="https://github.com/ajaniethos-1/gagiteck-assets.git"
+REPO_NAME="Gagiteck-AI-Saas-Agentic"
+REPO_URL="https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic.git"
 INSTALL_DIR="$HOME/$REPO_NAME"
 
 echo -e "${BLUE}╔══════════════════════════════════════════════════════════╗${NC}"
@@ -66,13 +66,13 @@ echo ""
 echo -e "${BLUE}Next Steps:${NC}"
 echo ""
 echo -e "1. ${YELLOW}Enable GitHub Pages:${NC}"
-echo -e "   - Go to: https://github.com/ajaniethos-1/gagiteck-assets/settings/pages"
+echo -e "   - Go to: https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/settings/pages"
 echo -e "   - Set source to 'main' branch and '/' (root) folder"
 echo -e "   - Save the settings"
 echo ""
 echo -e "2. ${YELLOW}Verify deployment:${NC}"
 echo -e "   - Wait a few minutes for GitHub Pages to deploy"
-echo -e "   - Visit: https://ajaniethos-1.github.io/gagiteck-assets/robots.txt"
+echo -e "   - Visit: https://ajaniethos-1.github.io/Gagiteck-AI-Saas-Agentic/robots.txt"
 echo ""
 echo -e "3. ${YELLOW}Setup Cloudflare Worker (Optional):${NC}"
 echo -e "   - Log in to Cloudflare Dashboard"

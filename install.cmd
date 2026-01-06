@@ -5,8 +5,8 @@ REM This script sets up the Gagiteck robots.txt repository
 setlocal enabledelayedexpansion
 
 REM Configuration
-set REPO_NAME=gagiteck-assets
-set REPO_URL=https://github.com/ajaniethos-1/gagiteck-assets.git
+set REPO_NAME=Gagiteck-AI-Saas-Agentic
+set REPO_URL=https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic.git
 set INSTALL_DIR=%USERPROFILE%\%REPO_NAME%
 
 echo ============================================================
@@ -79,13 +79,13 @@ echo.
 echo NEXT STEPS:
 echo.
 echo 1. ENABLE GITHUB PAGES:
-echo    - Go to: https://github.com/ajaniethos-1/gagiteck-assets/settings/pages
+echo    - Go to: https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/settings/pages
 echo    - Set source to 'main' branch and '/' (root) folder
 echo    - Save the settings
 echo.
 echo 2. VERIFY DEPLOYMENT:
 echo    - Wait a few minutes for GitHub Pages to deploy
-echo    - Visit: https://ajaniethos-1.github.io/gagiteck-assets/robots.txt
+echo    - Visit: https://ajaniethos-1.github.io/Gagiteck-AI-Saas-Agentic/robots.txt
 echo.
 echo 3. SETUP CLOUDFLARE WORKER (Optional):
 echo    - Log in to Cloudflare Dashboard

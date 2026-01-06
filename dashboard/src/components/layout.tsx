@@ -4,6 +4,10 @@ import { useSession, signOut } from 'next-auth/react'
 import { Bot, Workflow, Zap, Settings, Home, Menu, LogOut, User } from 'lucide-react'
 import { useState } from 'react'
 import { Button } from '@/components/ui/button'
+import { GlobalSearch } from '@/components/search'
+import { ThemeToggle } from '@/components/theme-toggle'
+import { MobileNav } from '@/components/mobile-nav'
+import { Onboarding } from '@/components/onboarding'
 
 const navigation = [
   { name: 'Dashboard', href: '/', icon: Home },
@@ -88,11 +92,15 @@ export function Layout({ children }: { children: React.ReactNode }) {
           >
             <Menu className="h-5 w-5" />
           </Button>
-          <div className="flex-1" />
+          <div className="flex-1">
+            <GlobalSearch />
+          </div>
 
-          <Button variant="outline" size="sm">
+          <Button variant="outline" size="sm" className="hidden sm:inline-flex">
             Documentation
           </Button>
+
+          <ThemeToggle />
 
           {/* User menu */}
           {session?.user && (
@@ -146,8 +154,14 @@ export function Layout({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Page content */}
-        <main className="p-6">{children}</main>
+        <main className="p-4 pb-20 sm:p-6 lg:pb-6">{children}</main>
       </div>
+
+      {/* Mobile bottom navigation */}
+      <MobileNav />
+
+      {/* Onboarding modal */}
+      <Onboarding />
     </div>
   )
 }
