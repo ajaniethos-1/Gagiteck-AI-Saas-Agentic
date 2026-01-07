@@ -36,8 +36,8 @@ dev = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic"
-Documentation = "https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/docs"
+Homepage = "https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic"
+Documentation = "https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/docs"
 Repository = "https://github.com/ajaniethos-1/gagiteck-python"
 
 [tool.setuptools.packages.find]

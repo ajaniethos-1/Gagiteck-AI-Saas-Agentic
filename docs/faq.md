@@ -285,13 +285,13 @@ print(response.debug.tool_calls)
 ### How do I get help?
 
 - **Documentation**: [docs/](.)
-- **Community**: [GitHub Discussions](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/discussions)
+- **Community**: [GitHub Discussions](https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/discussions)
 - **Email**: support@gagiteck.com
 - **Enterprise**: Dedicated Slack channel
 
 ### How do I report a bug?
 
-1. Check existing [GitHub Issues](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/issues)
+1. Check existing [GitHub Issues](https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/issues)
 2. Create a new issue with:
    - Steps to reproduce
    - Expected vs actual behavior

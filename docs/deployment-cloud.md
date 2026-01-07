@@ -82,8 +82,8 @@ aws sts get-caller-identity
 ### Step 1: Clone Repository
 
 ```bash
-git clone https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic.git
-cd gagiteck-AI-SaaS-Agentic/infrastructure/terraform
+git clone https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic.git
+cd Gagiteck-AI-Saas-Agentic/infrastructure/terraform
 ```
 
 ### Step 2: Configure Variables

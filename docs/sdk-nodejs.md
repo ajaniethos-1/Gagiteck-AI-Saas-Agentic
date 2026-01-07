@@ -530,4 +530,4 @@ console.log(response.text);
 - [API Reference](api-reference.md)
 - [GitHub Repository](https://github.com/ajaniethos-1/gagiteck-node)
 - [npm Package](https://www.npmjs.com/package/@gagiteck/sdk)
-- [Examples](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/tree/main/examples)
+- [Examples](https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/tree/main/examples)

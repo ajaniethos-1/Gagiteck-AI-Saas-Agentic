@@ -749,4 +749,4 @@ def health():
 - **API Status**: [status.mimoai.co](https://status.mimoai.co)
 - **Discord**: [discord.gg/gagiteck](https://discord.gg/gagiteck)
 - **Email**: developers@gagiteck.com
-- **GitHub Issues**: [github.com/gagiteck/sdk-python](https://github.com/gagiteck/sdk-python/issues)
+- **GitHub Issues**: [github.com/ajaniethos-1/gagiteck-python](https://github.com/ajaniethos-1/gagiteck-python/issues)

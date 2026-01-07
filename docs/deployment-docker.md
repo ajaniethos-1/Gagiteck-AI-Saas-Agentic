@@ -15,8 +15,8 @@ This guide covers deploying the Gagiteck AI SaaS Platform using Docker and Docke
 
 ```bash
 # Clone the repository
-git clone https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic.git
-cd gagiteck-AI-SaaS-Agentic
+git clone https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic.git
+cd Gagiteck-AI-Saas-Agentic
 
 # Copy environment template
 cp .env.example .env

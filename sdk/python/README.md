@@ -179,9 +179,9 @@ mypy gagiteck
 
 ## Documentation
 
-- [Full Documentation](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/docs)
-- [API Reference](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/docs/api-reference.md)
-- [Examples](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/examples)
+- [Full Documentation](https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/docs)
+- [API Reference](https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/docs/api-reference.md)
+- [Examples](https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/examples)
 
 ## License
 
@@ -190,5 +190,5 @@ MIT License - see [LICENSE](LICENSE) for details.
 ## Support
 
 - **Issues**: [GitHub Issues](https://github.com/ajaniethos-1/gagiteck-python/issues)
-- **Discussions**: [GitHub Discussions](https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic/discussions)
+- **Discussions**: [GitHub Discussions](https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic/discussions)
 - **Email**: support@gagiteck.com

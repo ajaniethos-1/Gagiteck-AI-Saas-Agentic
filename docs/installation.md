@@ -40,8 +40,8 @@ The fastest way to get started with all dependencies included.
 
 ```bash
 # Clone the repository
-git clone https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic.git
-cd gagiteck-AI-SaaS-Agentic
+git clone https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic.git
+cd Gagiteck-AI-Saas-Agentic
 
 # Copy environment template
 cp .env.example .env
@@ -72,8 +72,8 @@ For development or custom deployments.
 
 ```bash
 # Clone repository
-git clone https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic.git
-cd gagiteck-AI-SaaS-Agentic
+git clone https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic.git
+cd Gagiteck-AI-Saas-Agentic
 
 # Install Node.js dependencies
 npm install
@@ -125,10 +125,10 @@ npm start
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/new/template?template=gagiteck)
 
 #### Deploy to Render
-[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic)
+[![Deploy to Render](https://render.com/images/deploy-to-render-button.svg)](https://render.com/deploy?repo=https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic)
 
 #### Deploy to Vercel
-[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ajaniethos-1/gagiteck-AI-SaaS-Agentic)
+[![Deploy with Vercel](https://vercel.com/button)](https://vercel.com/new/clone?repository-url=https://github.com/ajaniethos-1/Gagiteck-AI-Saas-Agentic)
 
 ---
 
